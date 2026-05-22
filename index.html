@@ -1,1 +1,798 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Gaming Arcade - CPS & Reaction</title>
+    <!-- Laddar in Chart.js i bakgrunden så sidan inte blockeras eller blir vit -->
+    <script src="https://jsdelivr.net" async defer></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #090d16;
+            --card-bg: #111827;
+            --card-border: #1f2937;
+            --text: #f3f4f6;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
 
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Mode Switcher Tabs */
+        .arcade-tabs {
+            display: flex;
+            background: #1f2937;
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            border: 1px solid var(--card-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #9ca3af;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: #fff;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        h1 {
+            margin: 0 0 5px 0;
+            font-size: 34px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 25px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        #controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        select, button, input {
+            padding: 12px 20px;
+            font-size: 15px;
+            border-radius: 12px;
+            border: 1px solid #374151;
+            background: #1f2937;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            box-sizing: border-box;
+        }
+
+        input {
+            width: 90px;
+            text-align: center;
+            cursor: text;
+        }
+
+        input:focus {
+            outline: 2px solid var(--primary);
+            border-color: transparent;
+        }
+
+        #customDurationWrapper {
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button {
+            background: var(--primary);
+            border: none;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        button:disabled, select:disabled, input:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        #stopButton {
+            background: var(--danger);
+        }
+        #stopButton:hover:not(:disabled) {
+            background: #dc2626;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        #shareBtn {
+            background: var(--warning);
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+        #shareBtn:hover {
+            background: #d97706;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .live-dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid var(--card-border);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 4px;
+        }
+
+        /* Det huvudsakliga klickfönstret */
+        #clickBox {
+            width: 100%;
+            height: 240px;
+            background: linear-gradient(135deg, #1e40af, #6b21a8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 800;
+            border-radius: 20px;
+            cursor: not-allowed;
+            user-select: none;
+            transition: transform 0.05s, box-shadow 0.3s, background 0.2s, opacity 0.3s;
+            opacity: 0.4;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #clickBox.active {
+            opacity: 1;
+            cursor: pointer;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Unika statusfärger för reaktionstestet */
+        #clickBox.reaction-waiting {
+            background: var(--danger) !important;
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        #clickBox.reaction-ready {
+            background: var(--accent) !important;
+            opacity: 1;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+        }
+
+        #clickBox.active:active {
+            transform: scale(0.96);
+        }
+
+        .click-hint {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 6px;
+        }
+
+        #resultPanel {
+            margin-top: 20px;
+            padding: 5px;
+        }
+
+        .result-status {
+            font-size: 22px;
+            font-weight: 700;
+            min-height: 33px;
+            line-height: 1.4;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 160px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .highscore-box {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--card-border);
+            font-size: 14px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        
+        .highscore-value {
+            color: #fbbf24;
+            font-weight: 700;
+        }
+
+        /* Partikel-styling */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 9999;
+            animation: explode 0.6s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Arcade Mode Switches -->
+        <div class="arcade-tabs">
+            <button class="tab-btn active" id="tabCps" onclick="switchMode('cps')">⚡ CPS Test</button>
+            <button class="tab-btn" id="tabReaction" onclick="switchMode('reaction')">🎯 Reaktionstest</button>
+        </div>
+
+        <h1 id="mainTitle">Pro CPS Analyzer</h1>
+        <div class="subtitle" id="mainSubtitle">Professionellt verktyg för klickhastighet</div>
+        
+        <!-- CPS Kontroller -->
+        <div id="controls">
+            <select id="duration">
+                <option value="5">5 Sekunder</option>
+                <option value="10">10 Sekunder</option>
+                <option value="15">15 Sekunder</option>
+                <option value="30">30 Sekunder</option>
+                <option value="60">60 Sekunder</option>
+                <option value="custom">Anpassad...</option>
+            </select>
+            
+            <div id="customDurationWrapper">
+                <input type="number" id="customDurationInput" min="1" max="300" value="20">
+                <span style="font-size: 14px; color: #9ca3af;">sek</span>
+            </div>
+
+            <button id="startButton">Starta Analys</button>
+            <button id="stopButton" disabled>Avbryt</button>
+        </div>
+
+        <!-- Dashboard-paneler -->
+        <div class="live-dashboard">
+            <div class="stat-card">
+                <div class="stat-label" id="lblStat1">Tid kvar</div>
+                <div id="liveTimer" class="stat-value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" id="lblStat2">Live CPS</div>
+                <div id="liveCPS" class="stat-value">0.0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" id="lblStat3">Live CPM</div>
+                <div id="liveCPM" class="stat-value">0</div>
+            </div>
+        </div>
+
+        <!-- Huvudboxen för klick och reaktion -->
+        <div id="clickBox">
+            <span id="boxText">Redo för test</span>
+            <span id="boxSubtext" class="click-hint">Tryck på knappen ovan</span>
+        </div>
+
+        <!-- Resultat & Rekord -->
+        <div id="resultPanel">
+            <div id="resultStatus" class="result-status"></div>
+            
+            <div class="chart-container" id="chartWrapper">
+                <canvas id="cpsChart"></canvas>
+            </div>
+
+            <div class="highscore-box" id="hsBox">
+                🏆 Personbästa (<span id="hsTime">5</span>s): 
+                <span class="highscore-value" id="hsValue">0.00 CPS</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Spellägen och tillstånd
+        let currentMode = 'cps'; // 'cps' eller 'reaction'
+        let isTesting = false;
+        let audioCtx = null;
+        
+        // CPS Specifika variabler
+        let clickCount = 0;
+        let testDuration = 5;
+        let startTime = 0;
+        let animationFrameId = null;
+        let countdownInterval = null;
+        let clickTimestamps = [];
+        let chartLabels = [];
+        let chartData = [];
+        let chartInstance = null;
+
+        // Reaktions-specifika variabler
+        let reactionTimeout = null;
+        let reactionState = 'idle'; // 'idle', 'waiting' (röd), 'ready' (grön)
+        let reactionStartTime = 0;
+
+        // DOM Element
+        const clickBox = document.getElementById('clickBox');
+        const boxText = document.getElementById('boxText');
+        const boxSubtext = document.getElementById('boxSubtext');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const durationSelect = document.getElementById('duration');
+        const customDurationWrapper = document.getElementById('customDurationWrapper');
+        const customDurationInput = document.getElementById('customDurationInput');
+        const controlsDiv = document.getElementById('controls');
+        
+        const liveTimer = document.getElementById('liveTimer');
+        const liveCPS = document.getElementById('liveCPS');
+        const liveCPM = document.getElementById('liveCPM');
+        const resultStatus = document.getElementById('resultStatus');
+        const hsTimeLabel = document.getElementById('hsTime');
+        const hsValueLabel = document.getElementById('hsValue');
+        const chartWrapper = document.getElementById('chartWrapper');
+        
+        // Etiketter för dashboarden
+        const lblStat1 = document.getElementById('lblStat1');
+        const lblStat2 = document.getElementById('lblStat2');
+        const lblStat3 = document.getElementById('lblStat3');
+
+        // Initiering
+        updateHighscoreDisplay();
+        
+        durationSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customDurationWrapper.style.display = 'flex';
+            } else {
+                customDurationWrapper.style.display = 'none';
+            }
+            updateHighscoreDisplay();
+        });
+        customDurationInput.addEventListener('input', updateHighscoreDisplay);
+
+        // Växla spelläge (Flika)
+        function switchMode(mode) {
+            if (isTesting || reactionState === 'waiting' || reactionState === 'ready') return;
+            currentMode = mode;
+            
+            document.getElementById('tabCps').classList.toggle('active', mode === 'cps');
+            document.getElementById('tabReaction').classList.toggle('active', mode === 'reaction');
+            
+            if (mode === 'cps') {
+                document.getElementById('mainTitle').innerText = "Pro CPS Analyzer";
+                document.getElementById('mainSubtitle').innerText = "Professionellt verktyg för klickhastighet";
+                controlsDiv.style.display = 'flex';
+                lblStat1.innerText = "Tid kvar";
+                lblStat2.innerText = "Live CPS";
+                lblStat3.innerText = "Live CPM";
+                resetUI();
+            } else {
+                document.getElementById('mainTitle').innerText = "Reaktionstest";
+                document.getElementById('mainSubtitle').innerText = "Klicka så fort skärmen slår om till grön!";
+                controlsDiv.style.display = 'none'; // Göm tidväljaren
+                lblStat1.innerText = "Senaste";
+                lblStat2.innerText = "Bästa";
+                lblStat3.innerText = "Försök";
+                resetReactionUI();
+            }
+        }
+
+        function getActiveDuration() {
+            if (durationSelect.value === 'custom') {
+                let val = parseInt(customDurationInput.value);
+                if (isNaN(val) || val < 1) return 1;
+                return val;
+            }
+            return parseInt(durationSelect.value);
+        }
+
+        // Ljudgenerator
+        function playSound(freq, duration, type='triangle') {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                if (freq > 200) osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + duration);
+                
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        // Klickregistrering
+        clickBox.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            
+            // --- LOGIK FÖR CPS TEST ---
+            if (currentMode === 'cps') {
+                if (!isTesting) return;
+                const now = performance.now();
+                const elapsed = (now - startTime) / 1000;
+                if (elapsed >= testDuration) return;
+                
+                clickCount++;
+                clickTimestamps.push(elapsed);
+                boxText.innerText = clickCount;
+                boxSubtext.innerText = `Klickar loss!`;
+                
+                playSound(400, 0.04);
+                createParticles(e.clientX, e.clientY);
+
+                if (elapsed > 0) {
+                    liveCPS.innerText = (clickCount / elapsed).toFixed(1);
+                    liveCPM.innerText = Math.round((clickCount / elapsed) * 60);
+                }
+            } 
+            // --- LOGIK FÖR REAKTIONSTEST ---
+            else if (currentMode === 'reaction') {
+                if (reactionState === 'idle') {
+                    startReactionTest();
+                } else if (reactionState === 'waiting') {
+                    // TJUVSTART!
+                    clearTimeout(reactionTimeout);
+                    reactionState = 'idle';
+                    clickBox.className = '';
+                    boxText.innerText = "Tjuvstart! ❌";
+                    boxSubtext.innerText = "Du klickade för tidigt. Försök igen.";
+                    playSound(150, 0.3, 'sawtooth');
+                } else if (reactionState === 'ready') {
+                    // LYCKAT KLICK
+                    const endTime = performance.now();
+                    const reactionTime = Math.round(endTime - reactionStartTime);
+                    
+                    reactionState = 'idle';
+                    clickBox.className = '';
+                    boxText.innerText = `${reactionTime} ms`;
+                    boxSubtext.innerText = "Klicka här för att testa igen!";
+                    
+                    playSound(520, 0.15, 'sine');
+                    createParticles(e.clientX, e.clientY);
+                    
+                    // Hantera statistik och sparande
+                    liveTimer.innerText = `${reactionTime}ms`;
+                    
+                    let attempts = parseInt(liveCPM.innerText) + 1;
+                    liveCPM.innerText = attempts;
+                    
+                    let currentBest = parseInt(liveCPS.innerText);
+                    if (currentBest === 0 || reactionTime < currentBest) {
+                        liveCPS.innerText = reactionTime;
+                        localStorage.setItem('reaction_best', reactionTime);
+                        resultStatus.innerHTML = "<span style='color:#fbbf24;'>✨ Nytt Reaktionsrekord! ✨</span>";
+                    } else {
+                        resultStatus.innerHTML = "";
+                    }
+                    updateHighscoreDisplay();
+                }
+            }
+        });
+
+        // --- CPS START & AVBRYT ---
+        startButton.addEventListener('click', function() {
+            let countdown = 3;
+            resetUI();
+            startButton.disabled = true;
+            durationSelect.disabled = true;
+            customDurationInput.disabled = true;
+            stopButton.disabled = false;
+            resultStatus.innerText = `Gör dig redo... ${countdown}`;
+            resultStatus.style.color = '#f59e0b';
+
+            countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    resultStatus.innerText = `Gör dig redo... ${countdown}`;
+                } else {
+                    clearInterval(countdownInterval);
+                    startCpsTest();
+                }
+            }, 1000);
+        });
+
+        stopButton.addEventListener('click', function() {
+            clearInterval(countdownInterval);
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            resetUI();
+            resultStatus.innerText = 'Analysen avbröts.';
+            resultStatus.style.color = '#ef4444';
+        });
+
+        function startCpsTest() {
+            isTesting = true;
+            clickCount = 0;
+            clickTimestamps = [];
+            chartLabels = [];
+            chartData = [];
+            testDuration = getActiveDuration();
+            startTime = performance.now();
+            clickBox.className = 'active';
+            boxText.innerText = 'KLICKA!';
+            boxSubtext.innerText = 'Öka tempot!';
+            resultStatus.innerText = 'ANALYS PÅGÅR...';
+            resultStatus.style.color = '#3b82f6';
+            updateClock();
+        }
+
+        function updateClock() {
+            if (!isTesting) return;
+            const now = performance.now();
+            const elapsed = (now - startTime) / 1000;
+            const remaining = Math.max(0, testDuration - elapsed);
+            liveTimer.innerText = `${remaining.toFixed(2)}s`;
+
+            if (elapsed >= testDuration) {
+                endCpsTest();
+            } else {
+                animationFrameId = requestAnimationFrame(updateClock);
+            }
+        }
+
+        function endCpsTest() {
+            isTesting = false;
+            const finalCPS = (clickCount / testDuration).toFixed(2);
+            const finalCPM = Math.round((clickCount / testDuration) * 60);
+            
+            let rank = "Sköldpadda 🐢";
+            let rankColor = "#9ca3af";
+            if (finalCPS >= 13) { rank = "Gudomlig Klickgud ⚡"; rankColor = "#ec4899"; }
+            else if (finalCPS >= 10) { rank = "E-Sport Pro 🎮"; rankColor = "#a78bfa"; }
+            else if (finalCPS >= 7) { rank = "Snabb Gamer 🚀"; rankColor = "#60a5fa"; }
+            else if (finalCPS >= 4) { rank = "Stabil klickare 🖱️"; rankColor = "#10b981"; }
+
+            resultStatus.innerHTML = `
+                Resultat: <span style="color:#fff">${finalCPS} CPS</span> (${finalCPM} CPM)<br>
+                <span style="font-size:15px; color:${rankColor}; font-weight:600">Rank: ${rank}</span><br>
+                <button id="shareBtn" onclick="copyShareText('${finalCPS}')">📋 Kopiera Resultat</button>
+            `;
+            
+            boxText.innerText = `${finalCPS} CPS`;
+            boxSubtext.innerText = 'Analys slutförd';
+            
+            const savedScore = localStorage.getItem(`cps_hs_${testDuration}`) || 0;
+            if (parseFloat(finalCPS) > parseFloat(savedScore)) {
+                localStorage.setItem(`cps_hs_${testDuration}`, finalCPS);
+                resultStatus.innerHTML += `<br><span style="font-size:13px; color:#fbbf24; display:block; margin-top:5px;">✨ NYTT PERSONBÄSTA! ✨</span>`;
+            }
+
+            buildChart();
+            clickBox.className = '';
+            startButton.disabled = false;
+            durationSelect.disabled = false;
+            customDurationInput.disabled = false;
+            stopButton.disabled = true;
+            updateHighscoreDisplay();
+        }
+
+        // --- REAKTIONSTEST LOGIK ---
+        function startReactionTest() {
+            resultStatus.innerText = "";
+            reactionState = 'waiting';
+            clickBox.className = 'reaction-waiting';
+            boxText.innerText = "VÄNTA PÅ GRÖNT...";
+            boxSubtext.innerText = "Klicka absolut inte än!";
+            
+            // Slumpmässig tid mellan 2000ms till 5000ms (2-5 sekunder)
+            const randomDelay = Math.random() * 3000 + 2000;
+            
+            reactionTimeout = setTimeout(() => {
+                reactionState = 'ready';
+                clickBox.className = 'reaction-ready';
+                boxText.innerText = "KLICKA NU!!!";
+                boxSubtext.innerText = "FORT!!!";
+                reactionStartTime = performance.now();
+                playSound(600, 0.1, 'sine');
+            }, randomDelay);
+        }
+
+        // --- SYSTEMFUNKTIONER ---
+        function copyShareText(cps) {
+            const textToCopy = `⚡ Jag fick ${cps} CPS (${Math.round(cps * 60)} CPM) på ${testDuration} sekunder i Pro CPS Analyzer! Klarar du att slå mitt rekord? 🎮`;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const shareBtn = document.getElementById('shareBtn');
+                shareBtn.innerText = "✅ Kopierat!";
+                setTimeout(() => { shareBtn.innerText = "📋 Kopiera Resultat"; }, 2000);
+            });
+        }
+
+        function resetUI() {
+            clickBox.className = '';
+            boxText.innerText = 'Klicka här!';
+            boxSubtext.innerText = 'När testet har startat';
+            liveTimer.innerText = '-';
+            liveCPS.innerText = '0.0';
+            liveCPM.innerText = '0';
+            resultStatus.innerText = '';
+            chartWrapper.style.display = 'none';
+            if(chartInstance) chartInstance.destroy();
+            startButton.disabled = false;
+            durationSelect.disabled = false;
+            customDurationInput.disabled = false;
+            stopButton.disabled = true;
+            updateHighscoreDisplay();
+        }
+
+        function resetReactionUI() {
+            clearTimeout(reactionTimeout);
+            reactionState = 'idle';
+            clickBox.className = 'active'; // Gör den klickbar direkt för att starta
+            boxText.innerText = 'Klicka för att starta';
+            boxSubtext.innerText = 'Mät din reaktionssnabbhet';
+            liveTimer.innerText = '-';
+            
+            const best = localStorage.getItem('reaction_best') || 0;
+            liveCPS.innerText = best > 0 ? `${best}` : '0';
+            liveCPM.innerText = '0';
+            resultStatus.innerText = '';
+            chartWrapper.style.display = 'none';
+            updateHighscoreDisplay();
+        }
+
+        function updateHighscoreDisplay() {
+            if (currentMode === 'cps') {
+                document.getElementById('hsBox').style.display = 'block';
+                const duration = getActiveDuration();
+                const currentHS = localStorage.getItem(`cps_hs_${duration}`) || "0.00";
+                hsTimeLabel.innerText = duration;
+                hsValueLabel.innerText = `${parseFloat(currentHS).toFixed(2)} CPS`;
+            } else {
+                // Göm rutan i botten under reaktionstest, informationen ligger i dashboarden istället
+                document.getElementById('hsBox').style.display = 'none';
+            }
+        }
+
+        function createParticles(x, y) {
+            const particleCount = 6;
+            const colors = ['#60a5fa', '#a78bfa', '#f472b6', '#10b981', '#fbbf24'];
+            for (let i = 0; i < particleCount; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                const size = Math.random() * 6 + 4;
+                p.style.width = `${size}px`;
+                p.style.height = `${size}px`;
+                p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                p.style.left = `${x}px`;
+                p.style.top = `${y}px`;
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 60 + 40;
+                p.style.setProperty('--x', `${Math.cos(angle) * velocity}px`);
+                p.style.setProperty('--y', `${Math.sin(angle) * velocity}px`);
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }
+        }
+
+        function buildChart() {
+            if (typeof Chart === 'undefined') return;
+            chartWrapper.style.display = 'block';
+            const ctx = document.getElementById('cpsChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+
+            let rawDataPerSecond = new Array(testDuration).fill(0);
+            clickTimestamps.forEach(ts => {
+                let sec = Math.floor(ts);
+                if (sec >= 0 && sec < testDuration) rawDataPerSecond[sec]++;
+            });
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: rawDataPerSecond.map((_, index) => `${index + 1}s`),
+                    datasets: [{
+                        label: 'Exakt CPS under sekunden',
+                        data: rawDataPerSecond,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#8b5cf6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { min: 0, grid: { color: '#1f2937' }, ticks: { color: '#9ca3af', stepSize: 2 } },
+                        x: { grid: { color: '#1f2937' }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
