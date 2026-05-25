@@ -176,7 +176,7 @@
 
         .live-dashboard {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
             margin-bottom: 20px;
         }
@@ -291,7 +291,195 @@
             font-weight: 700;
         }
 
-        /* Partikel-styling */
+        /* Profilhantering */
+        .profile-manager {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .profile-manager select {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .profile-manager button {
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+
+        #profileModal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+        }
+
+        #profileModal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: #f3f4f6;
+            font-size: 22px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 10px 16px;
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .modal-buttons .cancel-btn {
+            background: #4b5563;
+        }
+
+        .modal-buttons .cancel-btn:hover {
+            background: #5a6a7a;
+        }
+
+        #historyButton {
+            background: #7c3aed;
+            margin-top: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #historyButton:hover {
+            background: #6d28d9;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        #historyModal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        #historyModal.active {
+            display: flex;
+        }
+
+        .history-modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .history-modal-content h2 {
+            margin-top: 0;
+            color: #f3f4f6;
+            font-size: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .history-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item .attempt-number {
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .history-item .attempt-value {
+            color: #60a5fa;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .history-item.best .attempt-value {
+            color: #fbbf24;
+        }
+
+        .history-empty {
+            text-align: center;
+            color: #6b7280;
+            padding: 30px 20px;
+            font-size: 14px;
+        }
+
+        .history-stats {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 15px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .history-stats .stat-line {
+            padding: 5px 0;
+        }
+
+        .history-stats .stat-value {
+            color: #f3f4f6;
+            font-weight: 700;
+            font-size: 15px;
+        }
         .particle {
             position: fixed;
             pointer-events: none;
@@ -313,6 +501,15 @@
         <div class="arcade-tabs">
             <button class="tab-btn active" id="tabCps" onclick="switchMode('cps')">⚡ CPS Test</button>
             <button class="tab-btn" id="tabReaction" onclick="switchMode('reaction')">🎯 Reaktionstest</button>
+        </div>
+
+        <!-- Profilhantering -->
+        <div class="profile-manager">
+            <select id="profileSelect" onchange="switchProfile(this.value)">
+                <option value="default">📌 Standard Profil</option>
+            </select>
+            <button onclick="openNewProfileModal()" title="Skapa ny profil">➕ Ny Profil</button>
+            <button id="deleteProfileBtn" onclick="deleteCurrentProfile()" title="Radera profil" style="display:none; background: var(--danger);">🗑️</button>
         </div>
 
         <h1 id="mainTitle">Pro CPS Analyzer</h1>
@@ -352,6 +549,10 @@
                 <div class="stat-label" id="lblStat3">Live CPM</div>
                 <div id="liveCPM" class="stat-value">0</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-label" id="lblStat4">Genomsnitt</div>
+                <div id="liveAvg" class="stat-value">-</div>
+            </div>
         </div>
 
         <!-- Huvudboxen för klick och reaktion -->
@@ -372,10 +573,165 @@
                 🏆 Personbästa (<span id="hsTime">5</span>s): 
                 <span class="highscore-value" id="hsValue">0.00 CPS</span>
             </div>
+
+            <button id="historyButton" onclick="openHistoryModal()">📊 Visa Historik</button>
+        </div>
+    </div>
+
+    <!-- Profilmodal -->
+    <div id="profileModal">
+        <div class="modal-content">
+            <h2>Skapa ny profil</h2>
+            <input type="text" id="profileNameInput" placeholder="Skriv profilnamn..." maxlength="30">
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeNewProfileModal()">Avbryt</button>
+                <button onclick="createNewProfile()">Skapa</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historik Modal -->
+    <div id="historyModal">
+        <div class="history-modal-content">
+            <h2>Försökshistorik <span onclick="closeHistoryModal()" style="cursor: pointer; font-size: 20px; color: #9ca3af;">✕</span></h2>
+            <div id="historyList" class="history-list"></div>
+            <div id="historyStats" class="history-stats"></div>
         </div>
     </div>
 
     <script>
+        // --- PROFILHANTERING ---
+        let currentProfile = localStorage.getItem('currentProfile') || 'default';
+        let profiles = JSON.parse(localStorage.getItem('profiles')) || { default: 'Standard Profil' };
+
+        function initializeProfiles() {
+            const profileSelect = document.getElementById('profileSelect');
+            profileSelect.innerHTML = '';
+            
+            Object.entries(profiles).forEach(([key, name]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = `📌 ${name}`;
+                profileSelect.appendChild(option);
+            });
+            
+            if (!profiles[currentProfile]) currentProfile = 'default';
+            profileSelect.value = currentProfile;
+            updateDeleteButton();
+        }
+
+        function updateDeleteButton() {
+            const deleteBtn = document.getElementById('deleteProfileBtn');
+            deleteBtn.style.display = currentProfile === 'default' ? 'none' : 'block';
+        }
+
+        function switchProfile(profileId) {
+            if (isTesting || reactionState === 'waiting' || reactionState === 'ready') return;
+            currentProfile = profileId;
+            localStorage.setItem('currentProfile', profileId);
+            resetUI();
+            updateDeleteButton();
+        }
+
+        function openNewProfileModal() {
+            document.getElementById('profileModal').classList.add('active');
+            document.getElementById('profileNameInput').focus();
+            document.getElementById('profileNameInput').value = '';
+        }
+
+        function closeNewProfileModal() {
+            document.getElementById('profileModal').classList.remove('active');
+        }
+
+        function createNewProfile() {
+            const name = document.getElementById('profileNameInput').value.trim();
+            if (!name) {
+                alert('Skriv ett profilnamn!');
+        currentProfile = localStorage.getItem('currentProfile') || 'default';
+        initializeProfiles();
+                return;
+            }
+            
+            // Skapa unik ID
+            const profileId = 'profile_' + Date.now();
+            profiles[profileId] = name;
+            localStorage.setItem('profiles', JSON.stringify(profiles));
+            
+            currentProfile = profileId;
+            localStorage.setItem('currentProfile', profileId);
+            
+            initializeProfiles();
+            closeNewProfileModal();
+            resetUI();
+        }
+
+        function deleteCurrentProfile() {
+            if (currentProfile === 'default') return;
+            if (!confirm(`Radera profilen "${profiles[currentProfile]}"?`)) return;
+            
+            delete profiles[currentProfile];
+            localStorage.setItem('profiles', JSON.stringify(profiles));
+            
+            // Radera också all data för denna profil
+            localStorage.removeItem(`cps_hs_5_${currentProfile}`);
+            localStorage.removeItem(`cps_hs_10_${currentProfile}`);
+            localStorage.removeItem(`cps_hs_15_${currentProfile}`);
+            localStorage.removeItem(`cps_hs_30_${currentProfile}`);
+            localStorage.removeItem(`cps_hs_60_${currentProfile}`);
+            localStorage.removeItem(`reaction_best_${currentProfile}`);
+            localStorage.removeItem(`cps_history_${currentProfile}`);
+            localStorage.removeItem(`reaction_history_${currentProfile}`);
+            
+            currentProfile = 'default';
+            localStorage.setItem('currentProfile', 'default');
+            
+            initializeProfiles();
+            resetUI();
+        }
+
+        function getProfilePrefix() {
+            return currentProfile === 'default' ? '' : `_${currentProfile}`;
+        }
+
+        function storageKey(base) {
+            return `${base}${getProfilePrefix()}`;
+        }
+
+        function getHistoryArray(base) {
+            try {
+                return JSON.parse(localStorage.getItem(storageKey(base)) || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveAttempt(base, value) {
+            const history = getHistoryArray(base);
+            history.push(value);
+            localStorage.setItem(storageKey(base), JSON.stringify(history));
+        }
+
+        function getHistoryAverage(base) {
+            const history = getHistoryArray(base);
+            if (!history.length) return 0;
+            const sum = history.reduce((total, item) => total + Number(item), 0);
+            return sum / history.length;
+        }
+
+        function getHistoryCount(base) {
+            return getHistoryArray(base).length;
+        }
+
+        function updateAverageDisplay() {
+            if (currentMode === 'cps') {
+                const average = getHistoryAverage('cps_history');
+                liveAvg.innerText = average > 0 ? `${average.toFixed(2)} CPS` : '-';
+            } else {
+                const average = getHistoryAverage('reaction_history');
+                liveAvg.innerText = average > 0 ? `${Math.round(average)} ms` : '-';
+            }
+        }
+
         // Spellägen och tillstånd
         let currentMode = 'cps'; // 'cps' eller 'reaction'
         let isTesting = false;
@@ -420,8 +776,11 @@
         const lblStat1 = document.getElementById('lblStat1');
         const lblStat2 = document.getElementById('lblStat2');
         const lblStat3 = document.getElementById('lblStat3');
+        const lblStat4 = document.getElementById('lblStat4');
+        const liveAvg = document.getElementById('liveAvg');
 
         // Initiering
+        initializeProfiles();
         updateHighscoreDisplay();
         
         durationSelect.addEventListener('change', function() {
@@ -433,6 +792,87 @@
             updateHighscoreDisplay();
         });
         customDurationInput.addEventListener('input', updateHighscoreDisplay);
+
+        // Modal event listeners
+        document.getElementById('profileModal').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') createNewProfile();
+            if (e.key === 'Escape') closeNewProfileModal();
+        });
+        document.getElementById('profileNameInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') createNewProfile();
+        });
+
+        document.getElementById('historyModal').addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeHistoryModal();
+        });
+
+        // --- HISTORIK HANTERING ---
+        function openHistoryModal() {
+            const historyModal = document.getElementById('historyModal');
+            historyModal.classList.add('active');
+            populateHistoryDisplay();
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.remove('active');
+        }
+
+        // Stäng modal vid klick utanför
+        document.getElementById('historyModal').addEventListener('click', function(e) {
+            if (e.target === this) closeHistoryModal();
+        });
+
+        document.getElementById('profileModal').addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-content')) return;
+            if (e.target === this) closeNewProfileModal();
+        });
+
+        function populateHistoryDisplay() {
+            const base = currentMode === 'cps' ? 'cps_history' : 'reaction_history';
+            const history = getHistoryArray(base);
+            const historyList = document.getElementById('historyList');
+            const historyStats = document.getElementById('historyStats');
+            
+            if (!history.length) {
+                historyList.innerHTML = '<div class="history-empty">Inga försök ännu. Börja och spara dina resultat!</div>';
+                historyStats.innerHTML = '';
+                return;
+            }
+
+            const sorted = [...history].sort((a, b) => b - a);
+            const best = Math.max(...history);
+            
+            historyList.innerHTML = history.map((value, idx) => {
+                const isBest = value === best;
+                const displayValue = currentMode === 'cps' ? 
+                    `${value.toFixed(2)} CPS` : 
+                    `${Math.round(value)} ms`;
+                return `<div class="history-item ${isBest ? 'best' : ''}">
+                    <span class="attempt-number">Försök ${idx + 1}</span>
+                    <span class="attempt-value">${displayValue}</span>
+                </div>`;
+            }).join('');
+
+            const average = getHistoryAverage(base);
+            const min = Math.min(...history);
+            const max = Math.max(...history);
+            
+            if (currentMode === 'cps') {
+                historyStats.innerHTML = `
+                    <div class="stat-line">Försök: <span class="stat-value">${history.length}</span></div>
+                    <div class="stat-line">Genomsnitt: <span class="stat-value">${average.toFixed(2)} CPS</span></div>
+                    <div class="stat-line">Bästa: <span class="stat-value">${max.toFixed(2)} CPS</span></div>
+                    <div class="stat-line">Sämsta: <span class="stat-value">${min.toFixed(2)} CPS</span></div>
+                `;
+            } else {
+                historyStats.innerHTML = `
+                    <div class="stat-line">Försök: <span class="stat-value">${history.length}</span></div>
+                    <div class="stat-line">Genomsnitt: <span class="stat-value">${Math.round(average)} ms</span></div>
+                    <div class="stat-line">Bästa: <span class="stat-value">${Math.round(min)} ms</span></div>
+                    <div class="stat-line">Sämsta: <span class="stat-value">${Math.round(max)} ms</span></div>
+                `;
+            }
+        }
 
         // Växla spelläge (Flika)
         function switchMode(mode) {
@@ -544,19 +984,19 @@
                     
                     // Hantera statistik och sparande
                     liveTimer.innerText = `${reactionTime}ms`;
+                    saveAttempt('reaction_history', reactionTime);
+                    liveCPM.innerText = getHistoryCount('reaction_history');
                     
-                    let attempts = parseInt(liveCPM.innerText) + 1;
-                    liveCPM.innerText = attempts;
-                    
-                    let currentBest = parseInt(liveCPS.innerText);
-                    if (currentBest === 0 || reactionTime < currentBest) {
+                    const storedBest = parseInt(localStorage.getItem('reaction_best' + getProfilePrefix()) || '0');
+                    if (storedBest === 0 || reactionTime < storedBest) {
                         liveCPS.innerText = reactionTime;
-                        localStorage.setItem('reaction_best', reactionTime);
+                        localStorage.setItem('reaction_best' + getProfilePrefix(), reactionTime);
                         resultStatus.innerHTML = "<span style='color:#fbbf24;'>✨ Nytt Reaktionsrekord! ✨</span>";
                     } else {
                         resultStatus.innerHTML = "";
                     }
                     updateHighscoreDisplay();
+                    updateAverageDisplay();
                 }
             }
         });
@@ -626,6 +1066,8 @@
             const finalCPS = (clickCount / testDuration).toFixed(2);
             const finalCPM = Math.round((clickCount / testDuration) * 60);
             
+            saveAttempt('cps_history', parseFloat(finalCPS));
+            
             let rank = "Sköldpadda 🐢";
             let rankColor = "#9ca3af";
             if (finalCPS >= 13) { rank = "Gudomlig Klickgud ⚡"; rankColor = "#ec4899"; }
@@ -641,14 +1083,14 @@
             
             boxText.innerText = `${finalCPS} CPS`;
             boxSubtext.innerText = 'Analys slutförd';
-            
-            const savedScore = localStorage.getItem(`cps_hs_${testDuration}`) || 0;
+            const savedScore = localStorage.getItem(`cps_hs_${testDuration}` + getProfilePrefix()) || "0.00";
             if (parseFloat(finalCPS) > parseFloat(savedScore)) {
-                localStorage.setItem(`cps_hs_${testDuration}`, finalCPS);
+                localStorage.setItem(`cps_hs_${testDuration}` + getProfilePrefix(), finalCPS);
                 resultStatus.innerHTML += `<br><span style="font-size:13px; color:#fbbf24; display:block; margin-top:5px;">✨ NYTT PERSONBÄSTA! ✨</span>`;
             }
 
             buildChart();
+            updateAverageDisplay();
             clickBox.className = '';
             startButton.disabled = false;
             durationSelect.disabled = false;
@@ -695,6 +1137,7 @@
             liveTimer.innerText = '-';
             liveCPS.innerText = '0.0';
             liveCPM.innerText = '0';
+            liveAvg.innerText = '-';
             resultStatus.innerText = '';
             chartWrapper.style.display = 'none';
             if(chartInstance) chartInstance.destroy();
@@ -713,9 +1156,10 @@
             boxSubtext.innerText = 'Mät din reaktionssnabbhet';
             liveTimer.innerText = '-';
             
-            const best = localStorage.getItem('reaction_best') || 0;
+            const best = localStorage.getItem('reaction_best' + getProfilePrefix()) || 0;
             liveCPS.innerText = best > 0 ? `${best}` : '0';
-            liveCPM.innerText = '0';
+            liveCPM.innerText = getHistoryCount('reaction_history');
+            updateAverageDisplay();
             resultStatus.innerText = '';
             chartWrapper.style.display = 'none';
             updateHighscoreDisplay();
@@ -725,13 +1169,14 @@
             if (currentMode === 'cps') {
                 document.getElementById('hsBox').style.display = 'block';
                 const duration = getActiveDuration();
-                const currentHS = localStorage.getItem(`cps_hs_${duration}`) || "0.00";
+                const currentHS = localStorage.getItem(`cps_hs_${duration}` + getProfilePrefix()) || "0.00";
                 hsTimeLabel.innerText = duration;
                 hsValueLabel.innerText = `${parseFloat(currentHS).toFixed(2)} CPS`;
             } else {
                 // Göm rutan i botten under reaktionstest, informationen ligger i dashboarden istället
                 document.getElementById('hsBox').style.display = 'none';
             }
+            updateAverageDisplay();
         }
 
         function createParticles(x, y) {
